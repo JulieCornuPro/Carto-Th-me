@@ -99,7 +99,17 @@ function carto_header_cart_html() {
     }
 
     $nombre = (int) WC()->cart->get_cart_contents_count();
-    $url    = wc_get_cart_url();
+
+    // wc_get_cart_url() retombe silencieusement sur la RACINE du site quand la
+    // page « Panier » n'est pas assignée dans WooCommerce → Réglages →
+    // Avancé. Le bouton semble alors fonctionner, et ramène à l'accueil.
+    //
+    // On préfère la boutique comme repli : à défaut d'un panier, on atterrit
+    // au moins sur des produits. Le vrai remède reste d'assigner la page dans
+    // les réglages — ce repli ne fait que rendre la panne moins déroutante.
+    $url = ( wc_get_page_id( 'cart' ) > 0 )
+        ? wc_get_cart_url()
+        : wc_get_page_permalink( 'shop', home_url( '/' ) );
 
     // Le libellé lu à voix haute doit dire ce que le chiffre signifie : « 3 »
     // seul ne veut rien dire hors du contexte visuel.
