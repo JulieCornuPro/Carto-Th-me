@@ -176,30 +176,220 @@ ul, ol { list-style: none; }
 }
 @media (min-width: 900px) { .site-branding__tag { display: block; } }
 
-/* Navigation principale */
-.main-navigation { margin-left: 0; }
-.main-navigation ul {
+/* ─── Navigation principale et panneaux déroulants ───────────────────────
+   Les entrées de premier niveau occupent TOUTE la hauteur de l'en-tête. Ce
+   n'est pas un choix décoratif : le panneau s'ouvre au ras du bord inférieur,
+   sans espace mort entre le lien et lui. Quelques pixels de vide suffiraient
+   à refermer le menu dès que la souris les traverse — le défaut classique
+   des menus déroulants.
+
+   L'ouverture est en CSS seul (:hover et :focus-within). Un menu qui dépend
+   d'un script ne s'ouvre plus quand celui-ci échoue à charger, et le clavier
+   doit y accéder au même titre que la souris.
+   ─────────────────────────────────────────────────────────────────────── */
+.main-navigation { align-self: stretch; }
+
+.main-navigation > ul {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  gap: 0;
+}
+
+/* Repère de positionnement du panneau : il se cale sur son entrée, pas sur
+   l'en-tête, pour rester aligné à gauche du libellé qui l'ouvre. */
+.main-navigation > ul > li {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.main-navigation > ul > li > a {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-.main-navigation a {
+  gap: 8px;
+  height: 100%;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
   font-family: var(--carto-font-mono);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--carto-text-lo);
-  padding: 8px 14px;
-  border: 1px solid transparent;
-  transition: border-color .25s, color .25s;
+  transition: color .25s var(--carto-ease), background .25s, border-color .25s;
 }
-.main-navigation a:hover,
-.main-navigation .current-menu-item > a {
+
+.main-navigation > ul > li > a:hover,
+.main-navigation > ul > li:focus-within > a,
+.main-navigation > ul > li.current-menu-item > a,
+.main-navigation > ul > li.current-menu-parent > a,
+.main-navigation > ul > li.current-menu-ancestor > a {
   color: var(--carto-teal);
-  border-color: var(--carto-border);
+  background: rgba(0,207,207,0.04);
+  border-bottom-color: var(--carto-teal);
 }
-.site-header__inner .npq-compte { margin-left: auto !important; }
+
+/* Le compteur a du sens dans le panneau, où l'on choisit une rubrique ; dans
+   la barre il n'ajouterait que du bruit. */
+.main-navigation > ul > li > a .nav-count { display: none; }
+
+.main-navigation .nav-caret {
+  font-family: var(--carto-font-mono);
+  font-size: 8px;
+  opacity: 0.7;
+  transition: transform .25s var(--carto-ease);
+}
+
+.main-navigation > ul > li > a:hover .nav-caret,
+.main-navigation > ul > li:focus-within > a .nav-caret {
+  transform: rotate(180deg);
+}
+
+/* ── Le panneau ──
+   Masqué par visibility plutôt que display: none, pour deux raisons — la
+   transition d'opacité a besoin que l'élément existe, et un élément
+   « invisible » n'est pas atteignable au clavier tant qu'il est fermé. */
+.main-navigation .sub-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 60;
+  display: block;
+  min-width: 296px;
+  padding: 10px 0 12px;
+  background: var(--carto-surface);
+  border: 1px solid var(--carto-border);
+  border-top: 3px solid var(--carto-teal);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity .2s var(--carto-ease), transform .2s var(--carto-ease), visibility .2s;
+}
+
+/* .is-open est posée par le script pour les appareils sans survol (tactile) :
+   là-bas, :hover ne se déclenche jamais de façon fiable. */
+.main-navigation > ul > li:hover > .sub-menu,
+.main-navigation > ul > li:focus-within > .sub-menu,
+.main-navigation > ul > li.is-open > .sub-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Intitulé de rubrique en tête de panneau. Décoratif : il répète le libellé
+   du parent, que le lecteur d'écran vient d'annoncer. */
+.main-navigation .sub-menu__eyebrow {
+  padding: 8px 18px 10px;
+  font-family: var(--carto-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--carto-muted);
+}
+
+.main-navigation .sub-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 0;
+  border-left: 2px solid transparent;
+  font-family: var(--carto-font-body);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--carto-text);
+  transition: color .25s var(--carto-ease), background .25s, border-color .25s;
+}
+
+.main-navigation .sub-menu li a:hover,
+.main-navigation .sub-menu li a:focus,
+.main-navigation .sub-menu li.current-menu-item > a {
+  color: var(--carto-teal);
+  border-left-color: var(--carto-teal);
+  background: var(--carto-teal-12);
+}
+
+.main-navigation .nav-chevron {
+  font-family: var(--carto-font-mono);
+  font-size: 12px;
+  color: var(--carto-muted);
+}
+
+/* Le libellé pousse le compteur contre le bord droit : les compteurs
+   s'alignent ainsi entre eux, quelle que soit la longueur des intitulés. */
+.main-navigation .sub-menu .nav-label { flex: 1; }
+
+.main-navigation .sub-menu .nav-count {
+  font-family: var(--carto-font-mono);
+  font-size: 11px;
+  color: var(--carto-muted);
+}
+
+/* Pousse tout ce qui suit la navigation contre le bord droit (compte, panier).
+   Un ressort dans le flux plutôt qu'une marge automatique sur chaque bloc :
+   ces blocs sont facultatifs, et un ressort marche même quand ils manquent. */
+.site-header__spacer { flex: 1 1 auto; }
+
+.site-header__inner .npq-compte { margin-left: 0 !important; }
+
+/* ─── Panier de l'en-tête ────────────────────────────────────────────────
+   Rendu par carto_header_cart_html(), et remplacé tel quel en AJAX après un
+   ajout au panier. Le compteur est un pavé plein : c'est le seul élément de
+   l'en-tête qui change en cours de navigation, il doit se voir.
+   ─────────────────────────────────────────────────────────────────────── */
+.carto-cart {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 14px;
+  margin-left: 20px;
+  white-space: nowrap;
+  background: var(--carto-teal-12);
+  border: 1px solid rgba(0,207,207,0.35);
+  font-family: var(--carto-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--carto-teal);
+  transition: box-shadow .25s var(--carto-ease);
+}
+
+.carto-cart:hover,
+.carto-cart:focus {
+  color: var(--carto-teal);
+  box-shadow: var(--carto-glow-teal, 0 0 24px rgba(0,207,207,0.30));
+}
+
+.carto-cart__count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--carto-teal);
+  color: #04141C;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+/* Panier vide : rien à signaler, donc rien qui brille. */
+.carto-cart--vide {
+  background: none;
+  border-color: var(--carto-border);
+  color: var(--carto-text-lo);
+}
+.carto-cart--vide .carto-cart__count {
+  background: var(--carto-border);
+  color: var(--carto-text-lo);
+}
 
 /* CTA nav */
 .nav-cta {
@@ -241,8 +431,39 @@ ul, ol { list-style: none; }
     padding: 24px var(--carto-gutter);
   }
   .main-navigation.is-open { display: block; }
-  .main-navigation ul { flex-direction: column; align-items: flex-start; gap: 0; }
-  .main-navigation a { display: block; padding: 14px 0; border: none; border-bottom: 1px solid var(--carto-border); }
+
+  .main-navigation > ul { flex-direction: column; align-items: stretch; height: auto; }
+  .main-navigation > ul > li { display: block; }
+  .main-navigation > ul > li > a {
+    height: auto;
+    padding: 14px 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--carto-border);
+  }
+
+  /* Dans le panneau burger, les sous-menus sont dépliés en permanence :
+     un survol n'existe pas au doigt, et un accordéon demanderait un geste
+     de plus pour atteindre ce que l'on est venu chercher. */
+  .main-navigation .sub-menu {
+    position: static;
+    min-width: 0;
+    padding: 4px 0 10px 14px;
+    background: none;
+    border: 0;
+    border-left: 1px solid var(--carto-border);
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .main-navigation .sub-menu li a { padding: 11px 12px; }
+  .main-navigation .nav-caret,
+  .main-navigation .sub-menu__eyebrow { display: none; }
+
+  /* Le libellé du panier cède la place au burger ; le compteur suffit. */
+  .carto-cart { margin-left: auto; margin-right: 12px; padding: 0 10px; }
+  .carto-cart__label { display: none; }
 }
 
 /* ─── MAIN CONTENT ───────────────────────────────────────────────────────── */

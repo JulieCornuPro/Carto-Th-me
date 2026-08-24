@@ -6,6 +6,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/* ─── Fichiers du thème ───────────────────────────────────────────────── */
+// Le walker du menu principal : il produit le balisage des panneaux
+// déroulants (intitulé de rubrique, chevrons, compteurs).
+require_once get_template_directory() . '/inc/class-carto-nav-walker.php';
+
 /* ─── Supports WordPress ──────────────────────────────────────────────── */
 function carto_setup() {
     load_theme_textdomain( 'carto', get_template_directory() . '/languages' );
@@ -70,6 +75,70 @@ function carto_enqueue_assets() {
     ] );
 }
 add_action( 'wp_enqueue_scripts', 'carto_enqueue_assets' );
+
+/* ─── Panier dans l'en-tête ───────────────────────────────────────────── */
+
+/**
+ * Le bouton panier de l'en-tête.
+ *
+ * Rendu par une fonction plutôt qu'écrit dans le gabarit, parce que
+ * WooCommerce le redemande tel quel en AJAX après chaque ajout au panier
+ * (filtre « fragments » plus bas). Deux balisages qui doivent rester
+ * identiques valent mieux écrits une seule fois.
+ *
+ * La classe .carto-cart sert de point d'ancrage au remplacement AJAX : c'est
+ * elle que WooCommerce cherche dans la page pour y injecter la version à jour.
+ *
+ * @return string HTML du bouton, chaîne vide sans WooCommerce.
+ */
+function carto_header_cart_html() {
+    // WC()->cart n'existe pas partout (administration, requêtes REST, tout
+    // début du chargement) : sans ce garde-fou, l'en-tête casse la page.
+    if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+        return '';
+    }
+
+    $nombre = (int) WC()->cart->get_cart_contents_count();
+    $url    = wc_get_cart_url();
+
+    // Le libellé lu à voix haute doit dire ce que le chiffre signifie : « 3 »
+    // seul ne veut rien dire hors du contexte visuel.
+    $aria = sprintf(
+        _n( 'Panier, %s article', 'Panier, %s articles', $nombre, 'carto' ),
+        number_format_i18n( $nombre )
+    );
+
+    ob_start();
+    ?>
+    <a class="carto-cart<?php echo $nombre ? '' : ' carto-cart--vide'; ?>"
+       href="<?php echo esc_url( $url ); ?>"
+       aria-label="<?php echo esc_attr( $aria ); ?>">
+        <span class="carto-cart__label" aria-hidden="true"><?php esc_html_e( 'Panier', 'carto' ); ?></span>
+        <span class="carto-cart__count" aria-hidden="true"><?php echo esc_html( number_format_i18n( $nombre ) ); ?></span>
+    </a>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Rafraîchit le compteur après un ajout au panier.
+ *
+ * WooCommerce ajoute au panier en AJAX : sans ce filtre, le chiffre de
+ * l'en-tête resterait celui du chargement de la page jusqu'à la navigation
+ * suivante — un panier qui ne bouge pas quand on y met quelque chose donne
+ * l'impression que le clic n'a pas fonctionné.
+ *
+ * @param array $fragments Morceaux de page à remplacer, indexés par sélecteur CSS.
+ * @return array
+ */
+function carto_cart_fragment( $fragments ) {
+    $html = carto_header_cart_html();
+    if ( '' !== $html ) {
+        $fragments['a.carto-cart'] = $html;
+    }
+    return $fragments;
+}
+add_filter( 'woocommerce_add_to_cart_fragments', 'carto_cart_fragment' );
 
 /* ─── Widgets / Sidebars ──────────────────────────────────────────────── */
 function carto_widgets_init() {

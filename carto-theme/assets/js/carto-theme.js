@@ -33,6 +33,58 @@
     });
   }
 
+  /* ─── Panneaux déroulants : appoints au CSS ─────────────────────────────
+     Le survol et le focus ouvrent les panneaux en CSS seul. Deux cas lui
+     échappent, et seulement ceux-là :
+
+     1. Le tactile. Sur une tablette, :hover ne se déclenche pas, ou se colle
+        après le tap. Le premier appui sur une entrée qui a un panneau doit
+        donc l'ouvrir au lieu de suivre le lien ; le second appui navigue.
+     2. La touche Échap, qui doit refermer un panneau ouvert au clavier.
+
+     Sous 768px rien de tout cela ne s'applique : les sous-menus y sont
+     dépliés en permanence dans le panneau burger.
+     ────────────────────────────────────────────────────────────────────── */
+  var sansSurvol = window.matchMedia ? window.matchMedia('(hover: none)') : null;
+  var parents    = nav ? nav.querySelectorAll('.menu-item-has-children') : [];
+
+  function fermerPanneaux(sauf) {
+    Array.prototype.forEach.call(parents, function (li) {
+      if (li !== sauf) { li.classList.remove('is-open'); }
+    });
+  }
+
+  Array.prototype.forEach.call(parents, function (li) {
+    var lien = li.querySelector(':scope > a');
+    if (!lien) { return; }
+
+    lien.addEventListener('click', function (e) {
+      var tactile = sansSurvol && sansSurvol.matches;
+      if (!tactile || window.innerWidth <= 768) { return; }
+
+      // Panneau déjà ouvert : l'appui suivant est une vraie navigation.
+      if (li.classList.contains('is-open')) { return; }
+
+      e.preventDefault();
+      fermerPanneaux(li);
+      li.classList.add('is-open');
+    });
+  });
+
+  // Un appui hors de la navigation referme ce qui traîne.
+  document.addEventListener('click', function (e) {
+    if (!nav || !nav.contains(e.target)) { fermerPanneaux(null); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' && e.key !== 'Esc') { return; }
+    fermerPanneaux(null);
+    // Sortir le focus du panneau, sinon :focus-within le rouvre aussitôt.
+    if (nav && nav.contains(document.activeElement) && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
+  });
+
   /* ─── Scroll Reveal ─────────────────────────────────────────────────── */
   var revealEls = document.querySelectorAll('.reveal-on-scroll');
 
