@@ -89,3 +89,17 @@
 </header>
 
 <div class="site-main" id="main-content">
+<?php
+/**
+ * Juste sous l'en-tête, avant tout contenu.
+ *
+ * Ce point d'accroche existe pour les bandeaux pleine largeur qui
+ * appartiennent à la navigation plutôt qu'à la page : fil d'Ariane, fil
+ * d'étapes d'un tunnel d'achat. Les gabarits de page, eux, travaillent tous
+ * à l'intérieur d'un .carto-wrap et ne peuvent rien poser de pleine largeur.
+ *
+ * Il est déclenché sur TOUTES les pages : c'est à ce qui s'y branche de
+ * décider s'il a quelque chose à dire ici.
+ */
+do_action( 'carto_apres_entete' );
+?>

@@ -7,6 +7,19 @@
  * Usage : get_template_part( 'template-parts/global/breadcrumb' );
  */
 
+/*
+ * Les pages de la boutique ont leur propre fil d'Ariane : le plugin NormaPrep
+ * en pose un, pleine largeur, dans un bandeau sous l'en-tête. Deux fils sur la
+ * même page diraient la même chose de deux façons différentes.
+ *
+ * On ne se retire que si ce plugin est bien là pour prendre le relais : sans
+ * lui, mieux vaut ce fil-ci que pas de fil du tout.
+ */
+if ( class_exists( 'NPQ_WooCommerce' ) && function_exists( 'is_woocommerce' )
+     && ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() ) ) {
+    return;
+}
+
 // Yoast SEO
 if ( function_exists('yoast_breadcrumb') ) {
     yoast_breadcrumb(
