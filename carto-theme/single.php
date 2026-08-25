@@ -5,7 +5,7 @@
 get_header();
 ?>
 
-<section style="padding-top:clamp(80px,10vw,140px)">
+<section style="padding-top:clamp(80px,10vw,140px);padding-bottom:clamp(48px,6vw,88px)">
     <div class="carto-wrap">
 
         <?php get_template_part( 'template-parts/global/breadcrumb' ); ?>
