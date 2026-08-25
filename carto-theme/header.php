@@ -56,15 +56,25 @@
                     'menu_id'        => 'primary-menu',
                     'container'      => false,
                     'depth'          => 2,
-                    'link_before'    => '',
-                    'link_after'     => '',
                     'fallback_cb'    => false,
+                    // Le walker produit les panneaux déroulants : intitulé de
+                    // rubrique, chevrons et compteurs. Sans lui, les sous-menus
+                    // s'afficheraient à plat dans la barre.
+                    'walker'         => new Carto_Nav_Walker(),
                 ] );
                 ?>
                 <?php if ( class_exists( 'NPQ_Espace' ) ) echo NPQ_Espace::bloc_compte( 'menu' ); ?>
             </nav>
         <?php endif; ?>
+
+        <!-- Ressort : pousse le compte et le panier contre le bord droit -->
+        <span class="site-header__spacer" aria-hidden="true"></span>
+
         <?php if ( class_exists( 'NPQ_Espace' ) ) echo NPQ_Espace::bloc_compte(); ?>
+
+        <!-- Panier (rien si WooCommerce est absent) -->
+        <?php get_template_part( 'template-parts/global/header-cart' ); ?>
+
         <!-- Burger mobile -->
         <button class="nav-toggle" id="nav-toggle" aria-controls="site-navigation" aria-expanded="false">
             <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -79,3 +89,17 @@
 </header>
 
 <div class="site-main" id="main-content">
+<?php
+/**
+ * Juste sous l'en-tête, avant tout contenu.
+ *
+ * Ce point d'accroche existe pour les bandeaux pleine largeur qui
+ * appartiennent à la navigation plutôt qu'à la page : fil d'Ariane, fil
+ * d'étapes d'un tunnel d'achat. Les gabarits de page, eux, travaillent tous
+ * à l'intérieur d'un .carto-wrap et ne peuvent rien poser de pleine largeur.
+ *
+ * Il est déclenché sur TOUTES les pages : c'est à ce qui s'y branche de
+ * décider s'il a quelque chose à dire ici.
+ */
+do_action( 'carto_apres_entete' );
+?>
