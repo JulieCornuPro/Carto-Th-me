@@ -71,7 +71,15 @@
   --carto-space-16: 64px;
 
   /* Layout */
-  --carto-max-width: 1200px;
+  /* 1400px : la largeur de la maquette du système de design.
+     Éprouvée d'abord sur les seules pages de vente, où le gain était le
+     plus net — un catalogue de trois colonnes plus une colonne de filtres
+     n'a pas de quoi respirer à 1200px. Généralisée ensuite au reste du
+     site pour que les pages ne changent pas de largeur d'un clic à
+     l'autre.
+     L'espace membre n'est pas concerné : il ne lit pas ce jeton, sa
+     barre latérale et son contenu portent leurs propres mesures. */
+  --carto-max-width: 1400px;
   --carto-gutter:    clamp(20px, 4vw, 80px);
   --carto-ease:      cubic-bezier(0.16,1,0.3,1);
   --carto-radius:    0px; /* Sharp by design */
