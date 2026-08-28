@@ -1008,12 +1008,50 @@ ul, ol { list-style: none; }
   color: var(--carto-muted);
   margin-bottom: 20px;
 }
-.site-footer__links { display: flex; flex-direction: column; gap: 10px; }
-.site-footer__links a {
+/* Les listes de liens du pied de page, qu'elles viennent du menu « footer »
+   ou d'un widget. Le second cas est le plus courant : un widget « Menu de
+   navigation » rend un <ul> dont on ne choisit pas la classe, d'où les
+   sélecteurs qui suivent — ils décrivent l'emplacement, que WordPress ne
+   peut pas nous retirer. */
+.site-footer__links,
+.site-footer__col .widget ul,
+.site-footer__col .widget .menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-footer__links a,
+.site-footer__col .widget a {
   font-size: 15px; color: var(--carto-text-lo);
   transition: color .2s;
 }
-.site-footer__links a:hover { color: var(--carto-teal); }
+.site-footer__links a:hover,
+.site-footer__col .widget a:hover { color: var(--carto-teal); }
+
+/* Un widget sous un autre dans la même colonne : deux listes distinctes,
+   pas une seule qui aurait doublé de longueur. */
+.site-footer__col .widget + .widget { margin-top: 32px; }
+
+/* Le titre de widget porte déjà .site-footer__col-title, posé par
+   register_sidebar(). Le double slash du système le préfixe, comme les
+   intitulés de rubrique de la boutique. */
+.site-footer__col-title::before {
+  content: "// ";
+  color: var(--carto-teal);
+}
+
+/* Les widgets à contenu libre (texte, HTML) ne sont pas des listes de
+   liens : ils gardent une hauteur de ligne lisible. */
+.site-footer__col .widget p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--carto-text-lo);
+  margin: 0 0 12px;
+}
 .site-footer__bottom {
   padding-top: 32px;
   border-top: 1px solid var(--carto-border);

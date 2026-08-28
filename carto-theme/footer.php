@@ -53,12 +53,23 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Widget footer 2 -->
-            <?php if ( is_active_sidebar( 'footer-2' ) ) : ?>
+            <!-- Colonnes de liens (widgets) -->
+            <?php
+            /*
+             * Chaque colonne est une zone de widgets distincte. Une colonne
+             * sans widget n'imprime rien du tout : la grille se referme
+             * dessus, plutôt que de laisser un vide qu'on prendrait pour un
+             * oubli.
+             */
+            foreach ( [ 'footer-2', 'footer-3', 'footer-4' ] as $zone ) :
+                if ( ! is_active_sidebar( $zone ) ) {
+                    continue;
+                }
+                ?>
                 <div class="site-footer__col">
-                    <?php dynamic_sidebar( 'footer-2' ); ?>
+                    <?php dynamic_sidebar( $zone ); ?>
                 </div>
-            <?php endif; ?>
+            <?php endforeach; ?>
 
             <!-- Contact / infos -->
             <?php if ( get_theme_mod( 'footer_contact' ) ) : ?>
