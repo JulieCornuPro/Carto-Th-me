@@ -162,14 +162,35 @@ function carto_widgets_init() {
         'after_title'   => '</div>',
     ] );
 
-    register_sidebar( [
-        'name'          => __( 'Footer Col 2', 'carto' ),
-        'id'            => 'footer-2',
-        'before_widget' => '<div class="widget">',
-        'after_widget'  => '</div>',
-        'before_title'  => '<div class="site-footer__col-title">',
-        'after_title'   => '</div>',
-    ] );
+    /*
+     * Trois colonnes de pied de page, et non une seule.
+     *
+     * La grille en prévoyait quatre depuis toujours — marque plus trois —
+     * mais une seule zone de widgets était déclarée. Tout ce qu'on voulait y
+     * mettre s'empilait donc dans la même colonne, ou n'y tenait pas.
+     *
+     * L'identifiant « footer-2 » est conservé tel quel malgré son rang :
+     * le renommer viderait la colonne chez qui l'a déjà remplie. Un
+     * identifiant de zone est une adresse, pas une étiquette — c'est le
+     * libellé qu'on lit dans l'administration, et lui peut changer.
+     */
+    $colonnes_pied = [
+        'footer-2' => __( 'Pied de page — colonne 1', 'carto' ),
+        'footer-3' => __( 'Pied de page — colonne 2', 'carto' ),
+        'footer-4' => __( 'Pied de page — colonne 3', 'carto' ),
+    ];
+
+    foreach ( $colonnes_pied as $id => $nom ) {
+        register_sidebar( [
+            'name'          => $nom,
+            'id'            => $id,
+            'description'   => __( 'Une colonne de liens du pied de page. Un widget « Menu de navigation » y affiche un menu WordPress : le titre du widget devient l\'intitulé de la colonne.', 'carto' ),
+            'before_widget' => '<div class="widget">',
+            'after_widget'  => '</div>',
+            'before_title'  => '<div class="site-footer__col-title">',
+            'after_title'   => '</div>',
+        ] );
+    }
 }
 add_action( 'widgets_init', 'carto_widgets_init' );
 
